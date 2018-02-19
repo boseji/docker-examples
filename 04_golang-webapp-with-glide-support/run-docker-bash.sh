@@ -1,2 +1,2 @@
 #!/bin/sh
-docker run --rm -it -v $(pwd):/go/src/app go-docker-dev bash
+docker run --rm -it -p 8080:8080 -v $(pwd)/src:/go/src/app/src go-docker-dev bash
