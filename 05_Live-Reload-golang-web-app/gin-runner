@@ -1,0 +1,2 @@
+#!/bin/sh
+gin --path src --port 8000 --appPort 8080 run main.go
