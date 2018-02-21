@@ -161,7 +161,7 @@ to get the executable File into the `dist` directory on the HOST.
 
 Now we need to create our `alpine` docker image for production:
 
-[**ex2.Dockerfile**]()
+[**ex2.Dockerfile**](https://github.com/boseji/dockerPlayground/blob/master/06_Multistage-Prod-build-go-web-app/ex2.Dockerfile)
 
 ```Dockerfile
 FROM alpine:3.7
@@ -205,8 +205,47 @@ Wow the `go-docker-prod` is only **10.6 MB** !!
 
 That's Great !!
 
-But the whole process of doing things to times. Build run and repeat. This is kind of cumbersome. So lets clean up the images and look at another method.
+But the whole process of doing things to times. 
+
+  * Build run 2 times 
+  
+  * 2 Separeate docker files and corresponding images
+  
+  * Maintain a copy of the executable on the Host
+
+  * Cleanup needed 
+
+This is kind of cumbersome. 
+
+So lets clean up the earlier images and look at another method.
 
 ## Multi-Stage Build
+
+We have a solution to our problems :
+
+*Welcome the Docker Multi-stage build*
+
+For more details: https://docs.docker.com/develop/develop-images/multistage-build/
+
+In our case we are having one build image and then pushing the executable into the actual production image. Docker allows creation of multiple images in the same docker file. But we need to have some way of identifing and using the specific images and their contents.
+
+The Multi-stage build solves this adding 3 important features:
+
+  *  Stage the Image creation using a special `as` keyword in the `FROM` line. This helps to **'tag'** name a specific build image stage. 
+
+  e.g. `FROM golang:1.8` becomes `FROM golang:1.8 as builder` this means that we can now reference this in other images.
+
+  *  `COPY --from=builder /go/src/github.com/alexellis/href-counter/app .` 
+
+  Here the `--from` flag names the previos build stage.
+
+  *  Stop at specific build stage:
+
+  `docker build --target builder -t alexellis2/href-counter:latest . `
+
+  Here the build would stop at `builder` stage only.
+
+
+Now Lets modify and combine our two `Dockerfile` examples:
 
 ## Improving upon default 'Multi-Stage' Builds
