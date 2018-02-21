@@ -231,20 +231,15 @@ In our case we are having one build image and then pushing the executable into t
 
 The Multi-stage build solves this adding 3 important features:
 
-  *  Stage the Image creation using a special `as` keyword in the `FROM` line. This helps to **'tag'** name a specific build image stage. 
-
+  *  Stage the Image creation using a special `as` keyword in the `FROM` line. This helps to **'tag'** name a specific build image stage.<br>
   e.g. `FROM golang:1.8` becomes `FROM golang:1.8 as builder` this means that we can now reference this in other images.
 
-  *  `COPY --from=builder /go/src/github.com/alexellis/href-counter/app .` 
-
+  *  `COPY --from=builder /go/src/github.com/alexellis/href-counter/app .`<br>
   Here the `--from` flag names the previos build stage.
 
-  *  Stop at specific build stage:
-
-  `docker build --target builder -t alexellis2/href-counter:latest . `
-
+  *  Stop at specific build stage:<br>
+  `docker build --target builder -t alexellis2/href-counter:latest . `<br>
   Here the build would stop at `builder` stage only.
-
 
 Now Lets modify and combine our two `Dockerfile` examples:
 
