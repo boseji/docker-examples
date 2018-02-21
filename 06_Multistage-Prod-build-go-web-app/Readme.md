@@ -47,12 +47,12 @@ Since we are actually going to do this inside the *Docker Container*.
 Here is the Improved upon command:
 
 ```shell
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main src/main.go
+CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main src/main.go
 ```
 
 Here are the Details:
 
-  * `CGO_ENABLED=0` disables the `cgo` compiler (not sure about this one !)
+  * `CGO_ENABLED=0` disables the `cgo` compiler (not sure about this one !). It was added from the default build example at https://golang.org
 
   * `GOOS=linux` Set the target build operation to geneare a linux binary
 
@@ -64,7 +64,7 @@ Here are the Details:
 
 Lets now do and build a docker Image:
 
-[**Ex1.Dockerfile**](https://github.com/boseji/dockerPlayground/blob/master/06_Multistage-Prod-build-go-web-app/ex1.Dockerfile)
+[**ex1.Dockerfile**](https://github.com/boseji/dockerPlayground/blob/master/06_Multistage-Prod-build-go-web-app/ex1.Dockerfile)
 
 ```Dockerfile
 FROM golang:1.8
@@ -127,6 +127,85 @@ Since there might be other service container and even the *smallest VMs* you can
 
 ## Building Lean production Image
 
+We now we know how to build the file inside the docker image.
+But due to the size of the default parent image we can't use our earlier image for production.
+
+Typically at this stage we might need to find a proper parent image which is lean enough.
+
+Here are some candidates at https://hub.docker.com/ :
+
+  *  [baseimage-docker](https://phusion.github.io/baseimage-docker/)
+  This is a trimmed down version of the ubuntu image. However the size is still not that great.
+
+  * [alpine](https://hub.docker.com/_/alpine/) Official repository of the Alpine linux. It's a very small but functional distro at **5MB** size.
+
+  * [busybox](https://hub.docker.com/_/busybox/) Official repository of the Busybox base Image. This image is again very small at **4MB** size but lacks the full backend package management.
+
+So from the above 3 we would select `alpine` since it has package management and is small.
+
+Lets first creat our custom image to build the Golang app:
+
+```shell
+docker build -t gobuilder -f ex1.Dockerfile .
+```
+
+We use the previous Dockerfile itself and create a new image `gobuilder` as our final production image will now be some thing diffrent.
+
+And then Run this -- 
+
+```shell
+docker run --rm -it -v "$PWD"/dist:/dist gobuilder cp ./main /dist/
+```
+
+to get the executable File into the `dist` directory on the HOST.
+
+Now we need to create our `alpine` docker image for production:
+
+[**ex2.Dockerfile**]()
+
+```Dockerfile
+FROM alpine:3.7
+# add ca-certificates in case you need them
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+# set working directory
+WORKDIR /app
+# copy the binary from builder
+ADD dist/main /app/main
+# run the binary
+CMD ["./main"]
+```
+
+Build this:
+
+```shell
+docker build -t go-docker-prod -f ex2.Dockerfile .
+```
+
+Finally Run It:
+
+```shell
+$ docker run --rm -it -p 8080:8080 go-docker-prod
+2018/02/21 03:28:58 Starting Server (with httprouter) on Port 8080
+```
+
+We now have a working `alpine` Image with our app.
+
+Lets look at the Size:
+
+```shell
+$ docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+go-docker-prod      latest              93bce994d76d        3 minutes ago       10.6MB
+gobuilder           latest              57a13e16446c        10 minutes ago      736MB
+golang              1.8                 0d283eb41a92        3 days ago          713MB
+alpine              3.7                 3fd9065eaf02        6 weeks ago         4.15MB
+```
+
+Wow the `go-docker-prod` is only **10.6 MB** !!
+
+That's Great !!
+
+But the whole process of doing things to times. Build run and repeat. This is kind of cumbersome. So lets clean up the images and look at another method.
 
 ## Multi-Stage Build
 
