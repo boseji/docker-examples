@@ -1,0 +1,16 @@
+# Git Specific Files
+.git
+.gitignore
+
+# Markdown Files
+*.md
+
+# Other Directories
+vendor
+myapp
+
+# Other Important files
+gin-bin
+Dockerfile
+*.Dockerfile
+*.sh
