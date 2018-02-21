@@ -14,13 +14,13 @@ The main intention of this example is to Show
 
   *  What are the problems of the default `Multisage Build` as on date (Feb'2018)
 
-  *  How to Improve upon and create a fix for non-removeable intermidiate docker images
+  *  How to Improve upon and create a fix for non-removable intermediate docker images
 
 ## Building the Go Web App for Production
 
 Lets get started by first understanding how we are going to build an executable.
 
-Typically a Golang excutable needs to built for the specific environment/OS.
+Typically a Golang executable needs to built for the specific environment/OS.
 
 ```shell
 go build src/main.go
@@ -29,7 +29,7 @@ go build src/main.go
 This should typically build it for our Host. However the build image would take
 the name of the directory.
 
-In this case `06_Multistage-Prod-build-go-web-app` if you are building this particualr directory.
+In this case `06_Multistage-Prod-build-go-web-app` if you are building this particular directory.
 
 Thats not ideal and we need a proper name for our app.
 
@@ -54,11 +54,11 @@ Here are the Details:
 
   * `CGO_ENABLED=0` disables the `cgo` compiler (not sure about this one !). It was added from the default build example at https://golang.org
 
-  * `GOOS=linux` Set the target build operation to geneare a linux binary
+  * `GOOS=linux` Set the target build operation to generate a linux binary
 
   * `-a` flag forces rebuilding of packages that are already up-to-date
 
-  * `-installsuffix cgo` renames the build depencies and directory with added suffix to separate them from default builds. In this case we are using `cgo` and the suffix.
+  * `-installsuffix cgo` renames the build dependencies and directory with added suffix to separate them from default builds. In this case we are using `cgo` and the suffix.
 
   * `-o main` specifies the output file name
 
@@ -100,7 +100,7 @@ Lets now run the newly created docker container:
 docker run --rm -it -p 8080:8080 go-docker-prod
 ```
 
-This command is warapped in the file `run-docker-prod-app.sh`.
+This command is wrapped in the file `run-docker-prod-app.sh`.
 
 This above command should work successfully ans show the following log message:
 
@@ -139,17 +139,17 @@ Here are some candidates at https://hub.docker.com/ :
 
   * [alpine](https://hub.docker.com/_/alpine/) Official repository of the Alpine linux. It's a very small but functional distro at **5MB** size.
 
-  * [busybox](https://hub.docker.com/_/busybox/) Official repository of the Busybox base Image. This image is again very small at **4MB** size but lacks the full backend package management.
+  * [busybox](https://hub.docker.com/_/busybox/) Official repository of the Busybox base Image. This image is again very small at **4MB** size but lacks the full back end package management.
 
 So from the above 3 we would select `alpine` since it has package management and is small.
 
-Lets first creat our custom image to build the Golang app:
+Lets first create our custom image to build the Golang app:
 
 ```shell
 docker build -t gobuilder -f ex1.Dockerfile .
 ```
 
-We use the previous Dockerfile itself and create a new image `gobuilder` as our final production image will now be some thing diffrent.
+We use the previous Dockerfile itself and create a new image `gobuilder` as our final production image will now be some thing different.
 
 And then Run this -- 
 
@@ -209,7 +209,7 @@ But the whole process of doing things to times.
 
   * Build run 2 times 
   
-  * 2 Separeate docker files and corresponding images
+  * 2 Separate docker files and corresponding images
   
   * Maintain a copy of the executable on the Host
 
@@ -227,7 +227,7 @@ We have a solution to our problems :
 
 For more details: https://docs.docker.com/develop/develop-images/multistage-build/
 
-In our case we are having one build image and then pushing the executable into the actual production image. Docker allows creation of multiple images in the same docker file. But we need to have some way of identifing and using the specific images and their contents.
+In our case we are having one build image and then pushing the executable into the actual production image. Docker allows creation of multiple images in the same docker file. But we need to have some way of identifying and using the specific images and their contents.
 
 The Multi-stage build solves this adding 3 important features:
 
@@ -235,7 +235,7 @@ The Multi-stage build solves this adding 3 important features:
   e.g. `FROM golang:1.8` becomes `FROM golang:1.8 as builder` this means that we can now reference this in other images.
 
   *  `COPY --from=builder /go/src/github.com/alexellis/href-counter/app .`<br><br>
-  Here the `--from` flag names the previos build stage.<br>
+  Here the `--from` flag names the previews build stage.<br>
   Also one can do this from an external image:<br><br>
   `COPY --from=nginx:latest /etc/nginx/nginx.conf /nginx.conf`
 
@@ -300,17 +300,17 @@ golang              1.8                 0d283eb41a92        3 days ago          
 alpine              3.7                 3fd9065eaf02        6 weeks ago         4.15MB
 ``` 
 
-We do have our corret `go-docker-prod` image with size of **10.6 MB** again.
+We do have our correct `go-docker-prod` image with size of **10.6 MB** again.
 
-But wait, we notice a stange Image:
+But wait, we notice a strange Image:
 
 `<none>              <none>              5c7def6e1073        4 minutes ago       736MB`
 
 Now this is created with our `go-docker-prod` build.
 
-This particular image is basically the intermidiate 'builder' Image that we created to get to the final prodiction image.
+This particular image is basically the intermediate 'builder' Image that we created to get to the final production image.
 
-**Note: Docker does remove the Intermidiate containers but does not remove intermidiate build images.This is default at the time (Feb'2018)**
+**Note: Docker does remove the Intermediate containers but does not remove intermediate build images.This is default at the time (Feb'2018)**
 
 This is more to this:
 
@@ -318,11 +318,11 @@ https://github.com/moby/moby/issues/34151
 
 https://forums.docker.com/t/how-to-remove-none-images-after-building/7050
 
-There are many suggested methods to remove this final wrinkel.
+There are many suggested methods to remove this final wrinkle.
 
 ## Improving upon default 'Multi-Stage' Builds
 
-We found that tagging intermidiate builds is the best way to remove the `<none>` images.
+We found that tagging intermediate builds is the best way to remove the `<none>` images.
 
 We first created out combo `Dockerfile`
 
@@ -394,7 +394,7 @@ golang              1.8                 0d283eb41a92        3 days ago          
 alpine              3.7                 3fd9065eaf02        6 weeks ago              4.15MB
 ```
 
-Well do not have the un-needed intermidiate image now.
+Well do not have the un-needed intermediate image now.
 
 And our `go-docker-prod` is created satisfactory with the **10.6 MB** size.
 
