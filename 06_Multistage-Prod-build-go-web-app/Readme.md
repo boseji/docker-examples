@@ -231,16 +231,180 @@ In our case we are having one build image and then pushing the executable into t
 
 The Multi-stage build solves this adding 3 important features:
 
-  *  Stage the Image creation using a special `as` keyword in the `FROM` line. This helps to **'tag'** name a specific build image stage.<br>
+  *  Stage the Image creation using a special `as` keyword in the `FROM` line.<br>This helps to **'tag'** name a specific build image stage.<br><br>
   e.g. `FROM golang:1.8` becomes `FROM golang:1.8 as builder` this means that we can now reference this in other images.
 
-  *  `COPY --from=builder /go/src/github.com/alexellis/href-counter/app .`<br>
-  Here the `--from` flag names the previos build stage.
+  *  `COPY --from=builder /go/src/github.com/alexellis/href-counter/app .`<br><br>
+  Here the `--from` flag names the previos build stage.<br>
+  Also one can do this from an external image:<br><br>
+  `COPY --from=nginx:latest /etc/nginx/nginx.conf /nginx.conf`
 
-  *  Stop at specific build stage:<br>
-  `docker build --target builder -t alexellis2/href-counter:latest . `<br>
+  *  Stop at specific build stage:<br><br>
+  `docker build --target builder -t alexellis2/href-counter:latest . `<br><br>
   Here the build would stop at `builder` stage only.
 
 Now Lets modify and combine our two `Dockerfile` examples:
 
+[**ex3.Dockerfile**](https://github.com/boseji/dockerPlayground/blob/master/06_Multistage-Prod-build-go-web-app/ex3.Dockerfile)
+
+```Dockerfile
+FROM golang:1.8 as builder
+# install glide
+RUN go get github.com/Masterminds/glide
+# Create the Working Directory
+WORKDIR /go/src/app
+# add glide.yaml and glide.lock
+ADD glide.yaml glide.yaml
+ADD glide.lock glide.lock
+# install packages
+RUN glide install
+# add source code
+ADD src src
+# build the source
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main src/main.go
+
+FROM alpine:3.7 as production
+# add ca-certificates in case you need them
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+# set working directory
+WORKDIR /app
+# copy the binary from builder
+COPY --from=builder /go/src/app/main .
+# run the binary
+CMD ["./main"]
+```
+
+Lets build this new file:
+
+```shell
+docker build -t go-docker-prod -f ex3.Dockerfile .
+```
+
+Now lets run the same:
+
+```shell
+$ docker run --rm -it -p 8080:8080 go-docker-prod
+2018/02/21 03:57:54 Starting Server (with httprouter) on Port 8080
+```
+
+Great ! now we have a same functionality only with a Single Command and One unified docker file.
+
+Lets now look at the images created:
+
+```shell
+$ docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+go-docker-prod      latest              a1778c484601        4 minutes ago       10.6MB
+<none>              <none>              5c7def6e1073        4 minutes ago       736MB
+golang              1.8                 0d283eb41a92        3 days ago          713MB
+alpine              3.7                 3fd9065eaf02        6 weeks ago         4.15MB
+``` 
+
+We do have our corret `go-docker-prod` image with size of **10.6 MB** again.
+
+But wait, we notice a stange Image:
+
+`<none>              <none>              5c7def6e1073        4 minutes ago       736MB`
+
+Now this is created with our `go-docker-prod` build.
+
+This particular image is basically the intermidiate 'builder' Image that we created to get to the final prodiction image.
+
+**Note: Docker does remove the Intermidiate containers but does not remove intermidiate build images.This is default at the time (Feb'2018)**
+
+This is more to this:
+
+https://github.com/moby/moby/issues/34151
+
+https://forums.docker.com/t/how-to-remove-none-images-after-building/7050
+
+There are many suggested methods to remove this final wrinkel.
+
 ## Improving upon default 'Multi-Stage' Builds
+
+We found that tagging intermidiate builds is the best way to remove the `<none>` images.
+
+We first created out combo `Dockerfile`
+
+[**combi.Dockerfile**](https://github.com/boseji/dockerPlayground/blob/master/06_Multistage-Prod-build-go-web-app/combo.Dockerfile)
+
+```Dockerfile
+# Builder Image for Making the Executable
+FROM golang:1.8 as builder
+# install glide
+RUN go get github.com/Masterminds/glide
+# Create the Working Directory
+WORKDIR /go/src/app
+# add glide.yaml and glide.lock
+ADD glide.yaml glide.yaml
+ADD glide.lock glide.lock
+# install packages
+RUN glide install
+# add source code
+ADD src src
+# build the source
+RUN go build src/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main src/main.go
+
+# Minimum System For the Production Image
+FROM alpine:3.7 as production
+# add ca-certificates in case you need them
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+# set working directory
+WORKDIR /root
+# copy the binary from builder - note Here the External Image Tag is used
+#   do not confuse this with the 'builder' tag used above
+COPY --from=gobuilder:latest /go/src/app/main .
+# run the binary
+CMD ["./main"]
+```
+
+Notice here we have used 2 build stage tags `builder` and `production`. You can multiple stages cascaded in this way.
+
+Now lets build it in a staged fashion:
+
+  1. Build and tag the `builder` Image as `gobuilder`
+```shell
+docker build --target builder -t gobuilder -f combo.Dockerfile .
+```
+
+  2. Build and tag the `production` Image as `go-docker-prod`
+```shell
+docker build --target production -t go-docker-prod -f combo.Dockerfile .
+```
+  **Note: Even though we ask for `production` stage , docker builds both the `builder` and the `production` together. This is default at the time (Feb'2018)**
+  No need to worry as docker has the 'builder' image cached so nothing will change there.
+
+  3. Remove the 'builder' image
+```shell
+docker rmi gobuilder
+```
+
+All the above steps have been packaged in a single script file:
+
+[**build-prod-docker.sh**](https://github.com/boseji/dockerPlayground/blob/master/06_Multistage-Prod-build-go-web-app/build-prod-docker.sh)
+
+Now lets look at the images:
+
+```shell
+$ docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED                  SIZE
+go-docker-prod      latest              3c3443fa02fb        Less than a second ago   10.6MB
+golang              1.8                 0d283eb41a92        3 days ago               713MB
+alpine              3.7                 3fd9065eaf02        6 weeks ago              4.15MB
+```
+
+Well do not have the un-needed intermidiate image now.
+
+And our `go-docker-prod` is created satisfactory with the **10.6 MB** size.
+
+Lets test out the App:
+
+```shell
+$ docker run --rm -it -p 8080:8080 go-docker-prod
+2018/02/21 04:20:50 Starting Server (with httprouter) on Port 8080
+```
+
+Yay:dizzy:! The app works and now with a compact and clean build system.:laughing:
+
+we have packaged the run command into the script file `run-docker-prod-app.sh`.

@@ -16,7 +16,7 @@ echo
 #docker build -t go-docker-prod -f production.Dockerfile .
 # ~ Final Section command in the Combo File to stop after 'Production' Target
 # ~  Also note that the 'builder' stage will not be executed since its done earlier
-docker build --target Production -t go-docker-prod -f combo.Dockerfile .
+docker build --target production -t go-docker-prod -f combo.Dockerfile .
 echo
 echo "  Here are the Built Images....."
 echo
