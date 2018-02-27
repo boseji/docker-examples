@@ -88,13 +88,13 @@ This is great and its so small, we knocked off nearly half of the image capacity
 
  [8]: https://docs.docker.com/config/containers/resource_constraints/
 
- [9]: https://github.com/boseji/dockerPlayground/tree/master/7_UPX_Compress_go_web_app/dev.Dockerfile
+ [9]: https://github.com/boseji/dockerPlayground/tree/master/07_UPX_Compress_go_web_app/dev.Dockerfile
 
- [10]: https://github.com/boseji/dockerPlayground/tree/master/7_UPX_Compress_go_web_app/dev-run.sh
+ [10]: https://github.com/boseji/dockerPlayground/tree/master/07_UPX_Compress_go_web_app/dev-run.sh
 
- [11]: https://github.com/boseji/dockerPlayground/tree/master/7_UPX_Compress_go_web_app/Dockerfile
+ [11]: https://github.com/boseji/dockerPlayground/tree/master/07_UPX_Compress_go_web_app/Dockerfile
 
- [12]: https://github.com/boseji/dockerPlayground/tree/master/7_UPX_Compress_go_web_app/run.sh
+ [12]: https://github.com/boseji/dockerPlayground/tree/master/07_UPX_Compress_go_web_app/run.sh
 
  [13]: https://github.com/boseji/dockerPlayground/tree/master/06_Multistage-Prod-build-go-web-app
 
