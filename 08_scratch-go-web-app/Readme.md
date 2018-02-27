@@ -11,7 +11,7 @@ Have a look at the new Docker file:
 
 [**Dockerfile**][11]
 
-```Dockerfle
+```Dockerfile
 # Setup the Developer System
 FROM golang:1.8 as builder
 # Add xz-utils for the installation of UPX
