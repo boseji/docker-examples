@@ -22,7 +22,6 @@ We have created the script for this.
 
 ```shell
 docker run --name some-postgres -v "$(pwd)/"data:/var/lib/postgresql/data \
---user "$(id -u):$(id -g)" -v /etc/passwd:/etc/passwd:ro \
 -e POSTGRES_PASSWORD=password -d postgres:10
 ```
 
@@ -32,12 +31,7 @@ Here are the pieces of the above command:
 
 2. Mount the Data folder: `-v "$(pwd)/"data:/var/lib/postgresql/data` for database storage
 
-3. Make sure we get correct user permission on the `data` folder we mounted
-`--user "$(id -u):$(id -g)" -v /etc/passwd:/etc/passwd:ro`
-
-This ensures that we get the correct permission of the current running user on the `data` directory.
-
-4. Setup the password for the database default user `postgres` to be *very insecure* "password". `-e POSTGRES_PASSWORD=password` 
+3. Setup the password for the database default user `postgres` to be *very insecure* "password". `-e POSTGRES_PASSWORD=password` 
 
 This sets the environment variable for the password `POSTGRES_PASSWORD` used in Postgres.
 
