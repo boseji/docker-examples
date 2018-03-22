@@ -10,6 +10,8 @@ Starting a MySQL instance is simple:
 
 ... where `some-mysql` is the name you want to assign to your container, `my-secret-pw` is the **password** to be set for the MySQL root user and tag is the tag specifying the MySQL version you want. See the list above for relevant tags.
 
+The Default user being `root` to login. Later more users can be created.
+
 ## Connect to MySQL from an application in another Docker container
 
 This image exposes the **standard MySQL port (3306)**, so container linking makes the MySQL instance available to other application containers. Start your application container like this in order to link it to the MySQL container:
