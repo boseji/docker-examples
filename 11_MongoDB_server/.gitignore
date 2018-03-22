@@ -1,0 +1,4 @@
+vendor
+*.img
+data
+all-databases.sql
