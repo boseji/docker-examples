@@ -1,0 +1,9 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', 'hello-image', '.' ]
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'save', '-o', 'hello-image.tar.gz', 'hello-image' ]
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'rmi', 'hello-image']
+- name: 'gcr.io/cloud-builders/gsutil'
+  args: ['-m', 'cp', 'hello-image.tar.gz', 'gs://svr1-go-build/']
