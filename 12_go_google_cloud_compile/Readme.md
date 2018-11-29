@@ -10,7 +10,9 @@ Finally the binary file is copied back into the previously created Storage Bucke
 
 ## Getting the Google Cloud SDK image
 
-`docker pull google/cloud-sdk`
+```shell
+docker pull google/cloud-sdk
+```
 
 This is the Image contains the complete SDK with all the required tools into a *Ubuntu* image.
 
@@ -91,12 +93,14 @@ The use of `--volumes-from gcloud-config` helps us get the credenetials
 Next we set the correct project:
 
 ```shell
-# gcloud config set project <PROJECT-ID>
+gcloud config set project <PROJECT-ID>
 ```
 
 ### Additional Step to create the Cloud Storage Bucket
 
-`gsutil mb gs://svr1-go-build`
+```shell
+gsutil mb gs://svr1-go-build
+```
 
 This command would help to create the buck where our built executable would reside.
 
