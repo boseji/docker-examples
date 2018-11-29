@@ -68,25 +68,31 @@ That was the explanation of this `cloudbuild.yaml` file which provides instructi
 
 ## Initiating the Upload
 
-### Step 1: We create the interactive instance of the `google/cloud-sdk` image
+### Step 1: Create a Login Instance of GCP `google/cloud-sdk` image
 
-`docker run -it --rm --name some-gcp -v "$(pwd)/"gosrc:/gosrc google/cloud-sdk`
+```shell
+docker run -ti --name gcloud-config google/cloud-sdk gcloud auth login
+```
+This would guide us for login by providing a URL.
 
+Copy the URL to our browser, login and copy back the authorization code to the terminal.
+
+### Step 2: We create the interactive instance of the `google/cloud-sdk` image
+
+```shell
+docker run --rm -ti --volumes-from gcloud-config -v "$(pwd)":/gosrc google/cloud-sdk
+```
 Here we are mounting the local folder `gosrc` so that we can use it inside the container `some-gcp`.
 
-### Step 2: Login to GCP
-
-We would need to login to Cloud Console so in the container's terminal we type the following:
-
-`gcloud auth login`
-
-and then copy the URL to our browser, login and copy back the code to the terminal.
+The use of `--volumes-from gcloud-config` helps us get the credenetials
 
 ### Step 3: Set GCP Project context
 
 Next we set the correct project:
 
-`gsutil config set project <PROJECT-ID>`
+```shell
+# gcloud config set project <PROJECT-ID>
+```
 
 ### Additional Step to create the Cloud Storage Bucket
 
@@ -101,7 +107,7 @@ directory to initiate the upload:
 
 ```shell
 cd /gosrc
-gcloud container builds submit --config cloudbuild.yaml
+gcloud builds submit --config cloudbuild.yaml
 ```
 
 This initiates the upload and asks the **Cloud Build** service to begin executing our commands specified in the `cloudbuild.yaml` file.
