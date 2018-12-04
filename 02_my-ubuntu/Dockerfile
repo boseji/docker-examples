@@ -7,7 +7,7 @@ FROM ubuntu:latest
 # ADD ./work /work
 
 # Important Packages:
-RUN apt update && \
+RUN DEBIAN_FRONTEND=noninteractive apt update && \
   apt upgrade -y &&\
   apt install -y apt-utils git-core nano curl wget python vim net-tools lsb-release ping
 # Generate the Keys as needed
