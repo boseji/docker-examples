@@ -1,0 +1,7 @@
+*.sh
+Dockerfile
+*.Dockerfile
+.git
+.gitignore
+*.img
+pgBackup
