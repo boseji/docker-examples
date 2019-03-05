@@ -55,7 +55,7 @@ Finally we are copying back the image into our Storage bucket.
 
 Make sure to follow the earlier steps to [get to the google/cloud-sdk console](https://github.com/boseji/dockerPlayground/tree/master/12_go_google_cloud_compile#initiating-the-upload)
 
-`gcloud container builds submit --config cloudbuild.yaml .`
+`gcloud builds submit --config cloudbuild.yaml .`
 
 ## Restoring the Image
 
