@@ -1,0 +1,10 @@
+"SSH Service"
+_ssh._tcp. local
+22
+Local SSH Service
+
+"Web Service"
+_http._tcp. local
+80
+Local Web Service
+

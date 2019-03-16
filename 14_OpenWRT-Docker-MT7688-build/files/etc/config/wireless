@@ -1,0 +1,28 @@
+
+config wifi-device 'radio0'
+	option type 'mac80211'
+	option hwmode '11g'
+	option path 'platform/10300000.wmac'
+	option htmode 'HT20'
+	option disabled '0'
+	option channel '7'
+	option country 'IN'
+	option legacy_rates '1'
+
+config wifi-iface 'ap'
+	option device 'radio0'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'OpenWrt'
+	option encryption 'psk2'
+	option key 'Password'
+
+config wifi-iface 'sta'
+	option network 'wan'
+	option device 'radio0'
+	option mode 'sta'
+	option ssid 'WiFi-SSID'
+	option encryption 'psk2'
+	option key 'WiFI-Password'
+
+
