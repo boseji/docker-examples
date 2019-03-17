@@ -172,11 +172,13 @@ development purposes.
 still the present working directory in the Host. Hence make sure you have 
 enough disk space available on the Host (minimum 10GByte).
 
-### WiFi Password for default AP `OpenWrt' is `Password`
+### WiFi Password for default AP `OpenWrt` is **`Password`**
 
 **Note:** The setup of files actually configures the default AP as **`OpenWrt`**.
 The **Access Point** network is *WPA Personal PSK2* type. 
 And *AP Password* is by default set to **`Password`**.
+
+You can change this by edit the `/etc/config/wireless` or directly modify it here in the `files` folder.
 
 ### Adding USB Storage Support .aka. Pendrive / Jump-drive .etc.:
 
