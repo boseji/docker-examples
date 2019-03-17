@@ -132,6 +132,8 @@ Here are the specifics of each script:
  * **[`3_Get_Sources.sh`][9]** = This would run inside the container. It fetches the
  *OpenWRT* source repository and sets it up with correct branch and feeds. 
  Finally it also helps to provide some boot-strapped configuration for *MT7688*.
+ It additionally copies the configuration files needed to make the setup for 
+ secure access-point.
  The user has an option to set further configuration if needed. After completion
  it executes the next script `4_build.sh`.
  * **[`4_build.sh`][10]** = This initiates the various build steps. It helps to
@@ -170,6 +172,106 @@ development purposes.
 still the present working directory in the Host. Hence make sure you have 
 enough disk space available on the Host (minimum 10GByte).
 
+### WiFi Password for default AP `OpenWrt' is `Password`
+
+**Note:** The setup of files actually configures the default AP as **`OpenWrt`**.
+The **Access Point** network is *WPA Personal PSK2* type. 
+And *AP Password* is by default set to **`Password`**.
+
+### Adding USB Storage Support .aka. Pendrive / Jump-drive .etc.:
+
+It's easy add USB Support during the build.
+
+In the **`6.`** step during execution of **`3_Get_Sources.sh`** you would be asked 
+
+`Continue with only Default config (y/n) [y] ? `
+
+Just answer **'n'** there and Press Enter to start the **Configuration**.
+
+You would now enter the configuration screen:
+
+![OpenWrt Build Configuration Screen][14]
+
+In order to navigate use the following keys:
+
+ * 'Arrow keys' to Move around
+ * 'Space Bar' to Select a module. Note that first it would be 'M' this is modularized.
+ Its best to have the things built into the image. 
+ Hence keep pressing space bar to get  the `*`. This means that the module is selected
+ * 'Enter' to select a specific menu
+ * 'Esc' x2 times to exit from menu or configuration screen. 
+ You might need to hit it multiple times to exit the configuration program.
+ * 'Tab' to select between Options
+
+Perform the Following Selection :
+
+```shell
+
+## Add Block Mount support (Press Space 2 times to make it a Built In '*')
+Base system ---> 
+<*> block-mount........................... Block device mounting
+## Press Esc x2 times to exit and go back to main menu
+
+## Next Kernel Support for USB and File Systems
+Kernel modules ---> Filesystems --->
+<*> kmod-fs-ext4..................................... EXT4 filesystem support
+<*> kmod-fs-ntfs..................................... NTFS filesystem support
+<*> kmod-fs-vfat..................................... VFAT filesystem support
+## Press Esc x2 times to exit and go back to Kernel modules menu
+
+USB Support ---> 
+-*- kmod-usb-storage..................................... USB Storage support
+<*> kmod-usb-storage-extras.................... Extra drivers for usb-storage
+## Press Esc x2 times to exit and go back to Kernel modules menu
+## Press Esc x2 times to exit and go back to main menu
+
+## Add LuCI Support
+LuCI ---> 1. Collections  --->
+<*> luci................... LuCI interface with Uhttpd as Webserver (default)
+## Press Esc x2 times to exit and go back to LuCI Menu
+## Press Esc x2 times to exit and go back to main menu
+
+## Add USB Utilities
+Utilities  --->
+<*> usbutils................................... USB devices listing utilities
+## Press Esc x2 times to exit and go back to main menu
+
+## Finally Press Esc x2 times to exit Configuration menu
+## You would be asked if 'Do you wish to save your new configuration?'
+## Just select '< Yes >' by Tab and then Press Enter
+
+```
+Thats it the build would begin normally.
+
+## Using the Build Output
+
+The generated file **`lks7688.img`** might not have the correct permissions.
+
+```shell
+sudo chown $USER lks7688.img
+```
+
+Without this the file can't be used normally. 
+
+Next would be copy this file to a FAT32 formatted pendrive.
+
+Finally after connecting the pendrive to the **LinkItSmart 7688** here is the button Sequence:
+
+1. Press & Hold the `WiFi Reset` Button
+2. Press and Release `MPU Reset` button while holding the `WiFi Reset`
+3. Wait for the **Orange LED** on the board to Turn ON and then OFF afte 5 seconds
+4. Finally after 5Second of holing the `WiFi Reset` the **Orange LED** goes off and you can release the `WiFi Reset`
+5. **Orange LED** would turn ON and start blinking. - This means that the new firmware is being flashed.
+6. Connect a serial monitor to see the boot of the system.
+
+For more info look on this procedure:
+
+https://docs.labs.mediatek.com/resource/linkit-smart-7688/en/tutorials/firmware-and-bootloader/update-the-firmware-with-a-usb-drive
+
+![Steps for USB Booloading of the LinkIt Smart 7688][15]
+
+
+
 
 
  [1]:https://www.seeedstudio.com/LinkIt-Smart-7688-p-2573.html
@@ -185,3 +287,5 @@ enough disk space available on the Host (minimum 10GByte).
  [11]:https://github.com/boseji/dockerPlayground/tree/master/14_OpenWRT-Docker-MT7688-build/2_install_dependencies.sh
  [12]:dropto_dev_shell.sh
  [13]:only_get_sources.sh
+ [14]:make-menuconfig.png
+ [15]:https://docs.labs.mediatek.com/resource/linkit-smart-7688/files/en/3145742/3145741/2/1469437979060/firmware+upgrade+LED+status.png

@@ -66,9 +66,10 @@ echo
 echo "-------------------------------------------------------------------------"
 
 echo
-echo " 6. Setup the Default Configuration"
+echo " 6. Setup the Default Configuration & Copying files"
 echo
 cp /store/config.mt7688 /store/openwrt/.config
+cp -r /store/files /store/openwrt/files
 make defconfig
 echo
 echo
